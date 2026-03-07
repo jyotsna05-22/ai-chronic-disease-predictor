@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Assessment | ChronoPreCure</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family: Arial, sans-serif;}
+
+/* ✅ ONLY THIS LINE CHANGED */
+body{
+    background: url("{{ url_for('static', filename='images/dna-bg.png') }}") no-repeat center center fixed;
+    background-size: cover;
+}
+
+.container{display:flex;min-height:100vh;}
+
+.sidebar{
+    width:260px;
+    background:#0b2a4a;
+    color:white;
+    padding:25px;
+    position:fixed;
+    height:100vh;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:30px;
+}
+
+.logo img{width:45px;}
+
+.sidebar a{
+    display:block;
+    padding:12px;
+    color:white;
+    text-decoration:none;
+    margin-top:10px;
+    border-radius:8px;
+}
+
+.sidebar a:hover{background:#1e4e8c;}
+
+.bottom-links{
+    position:absolute;
+    bottom:20px;
+    left:25px;
+    right:25px;
+}
+
+.main{
+    flex:1;
+    padding:40px;
+    margin-left:260px;
+}
+
+.form-card{
+    background:white;
+    padding:35px;
+    border-radius:20px;
+    max-width:650px;
+    box-shadow:0 0 25px rgba(0,0,0,0.2);
+}
+
+h1{color:#0b2a4a;margin-bottom:20px;}
+
+label{
+    margin-top:14px;
+    display:block;
+    font-weight:bold;
+    color:#0b2a4a;
+}
+
+input, textarea, select{
+    width:100%;
+    padding:12px;
+    margin-top:6px;
+    border-radius:14px;
+    border:3px solid #2563eb;
+    font-size:15px;
+}
+
+textarea{height:120px;resize:none;}
+
+button{
+    margin-top:22px;
+    padding:16px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:14px;
+    font-size:16px;
+    cursor:pointer;
+    width:100%;
+}
+
+button:hover{background:#1e4ed8;}
+
+.note{font-size:13px;margin-top:6px;color:#555;}
+
+.section-title{
+    margin-top:25px;
+    font-size:18px;
+    color:#0b2a4a;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="sidebar">
+    <div class="logo">
+        <img src="/static/images/logo.png">
+        <h2>ChronoPreCure</h2>
+    </div>
+
+    <a href="{{ url_for('dashboard') }}">Home</a>
+    <a href="{{ url_for('assessment') }}">New Assessment</a>
+    <a href="{{ url_for('statistics') }}">Statistics</a>
+    <a href="{{ url_for('overview') }}">Body Overview</a>
+    <a href="{{ url_for('settings') }}">Settings</a>
+
+    <div class="bottom-links">
+        <a href="{{ url_for('profile') }}">👤 Profile</a>
+        <a href="{{ url_for('logout') }}">🚪 Logout</a>
+    </div>
+</div>
+
+<div class="main">
+<div class="form-card">
+
+<h1>Health Assessment</h1>
+
+<form method="POST" action="/assessment">
+
+<div class="section-title">Basic Information</div>
+
+<label>Age</label>
+<input type="number" name="age" required>
+
+<label>Gender</label>
+<select name="gender" required>
+<option value="male">Male</option>
+<option value="female">Female</option>
+</select>
+
+<label>Height (cm)</label>
+<input type="number" name="height" required>
+
+<label>Weight (kg)</label>
+<input type="number" name="weight" required>
+
+<label>Blood Pressure (Upper number only e.g. 120)</label>
+<input type="number" name="bp" required>
+
+<label>Blood Sugar (if unknown enter 100)</label>
+<input type="number" name="glucose" required>
+
+<label>Cholesterol (mg/dL)</label>
+<input type="number" name="cholesterol" required>
+
+<div class="section-title">Lifestyle Details</div>
+
+<label>Do you smoke?</label>
+<select name="smoking">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+
+<label>Alcohol Consumption</label>
+<select name="alcohol">
+<option value="no">No</option>
+<option value="occasionally">Occasionally</option>
+<option value="regular">Regular</option>
+</select>
+
+<label>Exercise Frequency</label>
+<select name="exercise">
+<option value="none">No Exercise</option>
+<option value="light">1-2 days/week</option>
+<option value="moderate">3-5 days/week</option>
+<option value="heavy">Daily</option>
+</select>
+
+<label>Sleep Hours Per Day</label>
+<input type="number" name="sleep" min="1" max="12" required>
+
+<div class="section-title">Symptoms</div>
+
+<label>Chest Pain?</label>
+<select name="chest">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+
+<label>Breathing Difficulty?</label>
+<select name="breath">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+
+<label>Joint Pain?</label>
+<select name="joint">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+
+<label>Frequent Fatigue?</label>
+<select name="fatigue">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+
+<label>Mood Changes / Stress?</label>
+<select name="mood">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+
+<div class="section-title">Pregnancy (If Applicable)</div>
+
+<label>Are you pregnant?</label>
+<select name="pregnant">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+
+<label>Pregnancy Month (1-9)</label>
+<input type="number" name="preg_month" min="1" max="9">
+
+<label>Symptoms & Context (Optional)</label>
+<textarea name="symptoms"></textarea>
+
+<p class="note">
+Describe fatigue, dizziness, swelling, irregular periods, etc.
+</p>
+
+<button type="submit">Predict Diseases</button>
+
+</form>
+
+</div>
+</div>
+</div>
+
+</body>
+</html>

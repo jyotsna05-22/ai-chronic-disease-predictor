@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Body Overview | ChronoPreCure</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
+
+body{
+background:url("{{ url_for('static', filename='images/dna-bg.png') }}") no-repeat center center fixed;
+background-size:cover;
+}
+
+.container{
+display:flex;
+min-height:100vh;
+}
+
+/* Sidebar */
+
+.sidebar{
+width:260px;
+background:#0b2a4a;
+color:white;
+padding:25px;
+position:fixed;
+height:100vh;
+}
+
+.logo{
+display:flex;
+align-items:center;
+gap:12px;
+margin-bottom:30px;
+}
+
+.logo img{
+width:45px;
+}
+
+.sidebar a{
+display:block;
+padding:12px;
+color:white;
+text-decoration:none;
+margin-top:10px;
+border-radius:8px;
+}
+
+.sidebar a:hover{
+background:#1e4e8c;
+}
+
+.bottom-links{
+position:absolute;
+bottom:20px;
+left:25px;
+right:25px;
+}
+
+/* Main */
+
+.main{
+flex:1;
+margin-left:260px;
+padding:40px;
+}
+
+.page-title{
+color:white;
+font-size:40px;
+margin-bottom:25px;
+}
+
+/* Cards */
+
+.overview-card{
+background:white;
+padding:30px;
+border-radius:20px;
+box-shadow:0 0 25px rgba(0,0,0,0.3);
+margin-bottom:25px;
+}
+
+.overview-card h2{
+color:#2563eb;
+margin-bottom:15px;
+}
+
+.overview-card p{
+color:#333;
+line-height:1.6;
+margin-bottom:15px;
+}
+
+.overview-card ul{
+padding-left:20px;
+}
+
+.overview-card li{
+margin-bottom:10px;
+color:#333;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="sidebar">
+
+<div class="logo">
+<img src="{{ url_for('static', filename='images/logo.png') }}">
+<h2>ChronoPreCure</h2>
+</div>
+
+<a href="/dashboard">Home</a>
+<a href="/assessment">New Assessment</a>
+<a href="/statistics">Statistics</a>
+<a href="/overview">Body Overview</a>
+<a href="/settings">Settings</a>
+
+<div class="bottom-links">
+<a href="/profile">👤 Profile</a>
+<a href="/logout">🚪 Logout</a>
+</div>
+
+</div>
+
+
+<div class="main">
+
+<h1 class="page-title">Body Overview</h1>
+
+<!-- SYSTEM OVERVIEW -->
+
+<div class="overview-card">
+
+<h2>How ChronoPreCure Understands Your Body</h2>
+
+<p>
+ChronoPreCure is an intelligent health prediction system designed to analyze key health indicators
+and identify potential chronic disease risks early. Instead of relying on a single health metric,
+the system combines multiple physiological factors such as body composition, metabolic indicators,
+and cardiovascular measurements to build a more comprehensive understanding of your health.
+</p>
+
+<p>
+By analyzing user-provided health data including age, body mass index (BMI), blood pressure,
+glucose levels, and cholesterol levels, the system evaluates how these factors interact
+within your body. This approach helps identify early warning signs associated with chronic
+conditions and allows users to take preventive action before serious complications occur.
+</p>
+
+</div>
+
+
+<!-- HEALTH FACTORS -->
+
+<div class="overview-card">
+
+<h2>Health Factors Analyzed</h2>
+
+<p>The system evaluates several important health parameters that influence chronic disease risk:</p>
+
+<ul>
+
+<li>
+<strong>Age</strong> – Age influences metabolic activity, cardiovascular health,
+and susceptibility to many chronic conditions.
+</li>
+
+<li>
+<strong>Body Mass Index (BMI)</strong> – BMI measures body fat based on height and weight
+and helps determine risks associated with obesity and metabolic disorders.
+</li>
+
+<li>
+<strong>Blood Pressure</strong> – Elevated blood pressure is a major risk factor
+for heart disease, stroke, and kidney damage.
+</li>
+
+<li>
+<strong>Blood Glucose Level</strong> – High glucose levels may indicate insulin resistance
+or diabetes risk.
+</li>
+
+<li>
+<strong>Cholesterol Level</strong> – High cholesterol increases the risk of
+artery blockage, heart disease, and stroke.
+</li>
+
+</ul>
+
+</div>
+
+
+<!-- DISEASE PREDICTION -->
+
+<div class="overview-card">
+
+<h2>Disease Risk Categories Evaluated</h2>
+
+<p>
+Based on the health data provided during assessment, ChronoPreCure evaluates
+the risk level for several chronic health conditions:
+</p>
+
+<ul>
+
+<li>Diabetes</li>
+<li>Heart Disease</li>
+<li>Liver Disease</li>
+<li>Kidney Disease</li>
+<li>Obesity</li>
+<li>Asthma</li>
+<li>Arthritis</li>
+<li>Cancer Risk</li>
+<li>Stroke Risk</li>
+
+</ul>
+
+<p>
+If no significant risk factors are detected, the system categorizes the health status as
+<strong>Healthy</strong>.
+</p>
+
+</div>
+
+
+<!-- PERSONALIZED GUIDANCE -->
+
+<div class="overview-card">
+
+<h2>Personalized Health Guidance</h2>
+
+<p>
+After analyzing your health data, ChronoPreCure provides a personalized health report
+including:
+</p>
+
+<ul>
+
+<li>Predicted disease risk level (Low, Medium, or High)</li>
+<li>Preventive health recommendations</li>
+<li>Lifestyle improvement guidance</li>
+<li>Urgent medical warning signs if risk is high</li>
+<li>Customized weekly diet plan</li>
+<li>Recommended physical exercises based on the predicted condition</li>
+
+</ul>
+
+<p>
+These insights help users make informed lifestyle decisions and encourage
+preventive healthcare practices.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>

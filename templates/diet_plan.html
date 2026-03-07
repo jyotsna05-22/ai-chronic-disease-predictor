@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Diet Plan | ChronoPreCure</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* SAME DNA BACKGROUND */
+body{
+    background: url("{{ url_for('static', filename='images/dna-bg.png') }}") no-repeat center center fixed;
+    background-size: cover;
+}
+
+.container{
+    display:flex;
+    min-height:100vh;
+}
+
+/* SIDEBAR */
+.sidebar{
+    width:260px;
+    background:#0b2a4a;
+    color:white;
+    padding:25px;
+    position:fixed;
+    height:100vh;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:30px;
+}
+
+.logo img{
+    width:45px;
+}
+
+.sidebar a{
+    display:block;
+    padding:12px;
+    color:white;
+    text-decoration:none;
+    margin-top:10px;
+    border-radius:8px;
+}
+
+.sidebar a:hover{
+    background:#1e4e8c;
+}
+
+.bottom-links{
+    position:absolute;
+    bottom:20px;
+    left:25px;
+    right:25px;
+}
+
+/* MAIN */
+.main{
+    flex:1;
+    margin-left:260px;
+    padding:40px;
+}
+
+.card{
+    background:white;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 0 25px rgba(0,0,0,0.3);
+}
+
+h1{
+    color:#0b2a4a;
+    margin-bottom:20px;
+}
+
+h2{
+    color:#2563eb;
+    margin-bottom:15px;
+}
+
+/* TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th, td{
+    border:1px solid #ddd;
+    padding:12px;
+    text-align:center;
+}
+
+th{
+    background:#2563eb;
+    color:white;
+}
+
+tr:nth-child(even){
+    background:#f2f2f2;
+}
+
+/* EXERCISE BOX */
+.exercise-box{
+    margin-top:30px;
+    background:#f5f7ff;
+    padding:20px;
+    border-radius:15px;
+}
+
+.exercise-box ul{
+    margin-top:10px;
+    padding-left:20px;
+}
+
+.exercise-box li{
+    margin-bottom:8px;
+}
+
+/* BACK BUTTON */
+.back-btn{
+    margin-top:25px;
+    padding:12px 20px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+.back-btn:hover{
+    background:#1e4ed8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+<div class="logo">
+<img src="{{ url_for('static', filename='images/logo.png') }}">
+<h2>ChronoPreCure</h2>
+</div>
+
+<a href="{{ url_for('dashboard') }}">Home</a>
+<a href="{{ url_for('assessment') }}">New Assessment</a>
+<a href="{{ url_for('statistics') }}">Statistics</a>
+<a href="{{ url_for('overview') }}">Body Overview</a>
+<a href="{{ url_for('settings') }}">Settings</a>
+
+<div class="bottom-links">
+<a href="{{ url_for('profile') }}">👤 Profile</a>
+<a href="{{ url_for('logout') }}">🚪 Logout</a>
+</div>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+<div class="card">
+
+<h1>🥗 7-Day Recommended Diet Plan</h1>
+
+<h2>Disease: {{ data.disease }}</h2>
+
+<table>
+<tr>
+<th>Day</th>
+<th>Vegetarian</th>
+<th>Non-Vegetarian</th>
+</tr>
+
+{% for day in data.diet %}
+<tr>
+<td>{{ day }}</td>
+<td>{{ data.diet[day]["veg"] }}</td>
+<td>{{ data.diet[day]["nonveg"] }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+<div class="exercise-box">
+<h2>🏃 Recommended Exercises</h2>
+
+<ul>
+{% for ex in data.exercise %}
+<li>{{ ex }}</li>
+{% endfor %}
+</ul>
+
+</div>
+
+<a href="{{ url_for('results') }}">
+<button class="back-btn">⬅ Back to Results</button>
+</a>
+
+</div>
+</div>
+
+</div>
+
+</body>
+</html>

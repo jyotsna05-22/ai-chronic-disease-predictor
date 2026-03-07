@@ -1,0 +1,309 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    background-attachment: fixed;
+    color: white;
+}
+/* ===== RESET ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* ===== REMOVE ALL HTML BACKGROUND HACKS ===== */
+html, body {
+    min-height: 100%;
+}
+
+/* ===== DEFAULT BODY BACKGROUND (HOME/DASHBOARD) ===== */
+body {
+    background: url("/static/images/dna-bg.png") no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+}
+
+/* ===== LOGIN / REGISTER / FORGOT BACKGROUND ===== */
+body.auth-bg {
+    background: url("/static/images/bg.png") no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 60px;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.logo-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-box img {
+    width: 40px;
+}
+
+.logo-box span {
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    margin-left: 25px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+.nav-links a:hover {
+    background: #ff9800;
+}
+
+.nav-actions a {
+    margin-left: 15px;
+    padding: 10px 22px;
+    border-radius: 30px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.nav-actions a:first-child {
+    background: white;
+    color: #0d47a1;
+}
+
+.nav-actions a:last-child {
+    background: #ff5722;
+    color: white;
+}
+
+/* ===== HERO ===== */
+.hero {
+    padding: 140px 70px;
+    max-width: 700px;
+}
+
+/* ===== AUTH LOGO ===== */
+.auth-logo {
+    position: absolute;
+    top: 25px;
+    left: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.auth-logo img {
+    width: 40px;
+}
+
+/* ===== AUTH CONTAINER ===== */
+.auth-container {
+    width: 380px;
+    margin: 120px auto;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 35px;
+    border-radius: 14px;
+    text-align: center;
+}
+
+.input-box {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.input-box input {
+    width: 100%;
+    padding: 12px 12px 12px 40px;
+    border-radius: 25px;
+    border: none;
+    outline: none;
+}
+
+.input-box .icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.primary-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 25px;
+    border: none;
+    background: #ff5722;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.link {
+    color: #ff9800;
+    text-decoration: none;
+}
+/* ================= DASHBOARD & ASSESSMENT STYLING ================= */
+
+/* Layout */
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background: #0b2a4a;
+    color: white;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logo-area {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.logo-area img {
+    width: 60px;
+    margin-bottom: 10px;
+}
+
+.logo-area h2 {
+    font-size: 22px;
+}
+
+.menu {
+    list-style: none;
+    padding: 0;
+}
+
+.menu li {
+    margin-bottom: 15px;
+}
+
+.menu a {
+    text-decoration: none;
+    color: white;
+    padding: 12px;
+    display: block;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.menu a:hover,
+.menu a.active {
+    background: rgba(255,255,255,0.2);
+}
+
+.profile {
+    font-size: 14px;
+}
+
+/* Main Content */
+.main {
+    flex: 1;
+    padding: 40px;
+    color: white;
+}
+
+/* Dashboard Background */
+body.dashboard-bg {
+    background: url("/static/images/bg.png") no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* Topbar */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.search-box input {
+    padding: 12px 15px;
+    width: 350px;
+    border-radius: 8px;
+    border: none;
+}
+
+.icons span {
+    font-size: 22px;
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+/* White Cards */
+.cards {
+    display: flex;
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.card {
+    background: white;
+    color: #0b2a4a;
+    padding: 30px;
+    border-radius: 12px;
+    width: 220px;
+    text-align: center;
+    border: 2px solid #1e88e5;
+}
+
+.btn {
+    background: #1e88e5;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.box {
+    background: white;
+    color: #0b2a4a;
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid #1e88e5;
+    margin-top: 25px;
+}
+
+/* Forms */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+}
+
+textarea {
+    grid-column: span 4;
+    resize: none;
+    height: 90px;
+}

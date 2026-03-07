@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChronoPreCure</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .nav-links a,
+        .nav-links a:hover,
+        .nav-links a:focus,
+        .nav-links a:active {
+            background: none !important;
+            color: white !important;
+            outline: none !important;
+        }
+
+        .start {
+            display: inline-block;
+            background-color: #ff6a00;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s ease;
+        }
+
+        .start:hover {
+            background-color: #e65c00;
+            transform: scale(1.05);
+        }
+
+        section {
+            padding: 80px 10%;
+        }
+
+        /* ✅ DEEP WATER STYLE */
+        .content-box {
+            background: linear-gradient(135deg, #0a1f3d, #083358);
+            color: #e0f2ff;
+            padding: 50px;
+            border-radius: 20px;
+            margin-bottom: 60px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .content-box h2 {
+            color: #4db8ff;
+            margin-bottom: 25px;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: #4db8ff;
+        }
+
+        .content-box p {
+            line-height: 1.8;
+            margin-bottom: 18px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="logo-box">
+        <img src="{{ url_for('static', filename='images/logo.png') }}">
+        <span>ChronoPreCure</span>
+    </div>
+
+    <div class="nav-links">
+        <a href="{{ url_for('login') }}">Home</a>
+        <a href="#overview">Overview</a>
+        <a href="#services">Services</a>
+        <a href="#symptoms">Symptoms</a>
+        <a href="#contact">Contact</a>
+        <a href="#about">About</a>
+    </div>
+
+    <div class="nav-actions">
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+    </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+    <h1>AI-Based Chronic Disease Predictor</h1>
+    <p>
+        Predict health risks early using Artificial Intelligence based on
+        symptoms, lifestyle, and medical history.
+    </p>
+
+    <div class="buttons">
+        <a href="{{ url_for('login') }}" class="start">Start Assessment</a>
+    </div>
+</section>
+
+<!-- OVERVIEW -->
+<section id="overview">
+    <div class="content-box">
+        <h2>Comprehensive Health Overview</h2>
+
+        <p>
+            ChronoPreCure is an advanced artificial intelligence–powered health intelligence platform
+            designed to evaluate chronic disease risks before they become life-threatening.
+            Our system does not rely on a single symptom or isolated parameter.
+            Instead, it studies the interconnected relationship between metabolic indicators,
+            cardiovascular signals, hormonal balance, lifestyle habits, sleep cycles,
+            emotional stress levels, and nutritional patterns.
+        </p>
+
+        <p>
+            Chronic diseases such as diabetes, hypertension, heart disease, kidney disorders,
+            and metabolic syndromes often develop silently over years.
+            Most individuals remain unaware until symptoms become severe.
+            ChronoPreCure changes this by offering predictive modeling that evaluates risk progression
+            patterns and early warning signals.
+        </p>
+
+        <p>
+            By combining machine learning algorithms with medical logic,
+            the platform generates personalized insights, interprets biological trends,
+            and provides clear preventive guidance.
+            Our mission is to transform reactive healthcare into proactive prevention.
+        </p>
+    </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+    <div class="content-box">
+        <h2>Advanced AI Health Services</h2>
+
+        <p><span class="highlight">AI Risk Prediction Engine:</span>
+        A multi-parameter algorithm that analyzes blood pressure, glucose,
+        cholesterol, BMI, age, sleep quality, and symptom patterns to determine
+        early chronic disease probabilities.</p>
+
+        <p><span class="highlight">Personalized Preventive Strategy:</span>
+        Custom-tailored recommendations including lifestyle correction,
+        stress reduction plans, activity scheduling, and dietary adjustments
+        designed to minimize disease progression.</p>
+
+        <p><span class="highlight">Dynamic Diet Optimization:</span>
+        Nutrition recommendations aligned with metabolic health indicators,
+        risk levels, and physiological conditions to support internal healing
+        and long-term balance.</p>
+
+        <p><span class="highlight">Risk Categorization & Severity Mapping:</span>
+        Categorizes health risks into Low, Moderate, and High zones,
+        allowing users to understand urgency and take timely action.</p>
+
+        <p><span class="highlight">Comprehensive Health Analytics Dashboard:</span>
+        Visualizes trends over time, compares assessments,
+        and provides actionable insights based on previous health data.</p>
+    </div>
+</section>
+
+<!-- SYMPTOMS -->
+<section id="symptoms">
+    <div class="content-box">
+        <h2>Chronic Disease Indicators We Analyze</h2>
+
+        <p><span class="highlight">Cardiovascular Conditions:</span>
+        Elevated blood pressure, irregular heartbeat,
+        chest discomfort, arterial stiffness, and cholesterol imbalance
+        that may indicate hypertension or heart disease risks.</p>
+
+        <p><span class="highlight">Metabolic Disorders (Diabetes):</span>
+        High fasting glucose, excessive fatigue,
+        abnormal weight gain, insulin resistance patterns,
+        and dietary sugar sensitivity indicators.</p>
+
+        <p><span class="highlight">Kidney Function Abnormalities:</span>
+        Fluid retention, swelling, abnormal metabolic waste markers,
+        and blood pressure-related renal stress signals.</p>
+
+        <p><span class="highlight">Liver & Digestive Conditions:</span>
+        Fatty liver indicators, elevated enzyme patterns,
+        metabolic overload signals, and poor nutritional absorption signs.</p>
+
+        <p><span class="highlight">Stress & Lifestyle Imbalance:</span>
+        Chronic sleep deprivation, anxiety markers,
+        hormonal imbalance triggers, and sedentary behavior effects
+        that indirectly accelerate chronic disease development.</p>
+    </div>
+</section>
+
+<!-- CONTACT (UNCHANGED DESIGN, STILL DEEP WATER) -->
+<section id="contact">
+    <div class="content-box">
+        <h2>Contact</h2>
+        <p>Email: support@chronoprecure.com</p>
+        <p>Phone: +91 98765 43210</p>
+        <p>Location: India</p>
+    </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+    <div class="content-box">
+        <h2>About ChronoPreCure</h2>
+
+        <p>
+            ChronoPreCure was built with a vision to bridge the gap between
+            technology and preventive healthcare.
+            We believe early detection saves lives,
+            reduces long-term medical costs,
+            and empowers individuals to take control of their health journey.
+        </p>
+
+        <p>
+            Our platform integrates intelligent health modeling,
+            medical research logic, and predictive AI systems
+            to create a user-friendly yet scientifically structured solution.
+            We aim to support individuals, families,
+            and healthcare institutions with reliable health risk insights.
+        </p>
+
+        <p>
+            By continuously refining our prediction logic,
+            expanding disease models,
+            and enhancing personalized recommendations,
+            ChronoPreCure strives to become a trusted AI companion
+            for long-term wellness and disease prevention.
+        </p>
+    </div>
+</section>
+
+</body>
+</html>

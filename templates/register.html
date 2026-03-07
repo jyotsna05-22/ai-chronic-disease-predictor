@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register | ChronoPreCure</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-bg">
+    <div class="auth-logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+    <span>ChronoPreCure</span>
+</div>
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    document.body.classList.add("page-enter");
+
+    const links = document.querySelectorAll("a");
+
+    links.forEach(link => {
+        if (link.href && link.target !== "_blank") {
+            link.addEventListener("click", function(e) {
+                e.preventDefault();
+                const url = this.href;
+
+                document.body.classList.remove("page-enter");
+                document.body.classList.add("page-exit");
+
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 400);
+            });
+        }
+    });
+
+});
+</script>
+
+<div class="auth-container">
+
+    <h2>Create your account</h2>
+    <p class="subtitle">
+        Register to start assessing and improving your health with ChronoPreCure.
+    </p>
+
+    <form action="{{ url_for('dashboard') }}" method="get">
+
+        <div class="input-box">
+            <span class="icon">👤</span>
+            <input type="text" placeholder="Full name" required>
+        </div>
+
+        <div class="input-box">
+            <span class="icon">📧</span>
+            <input type="email" placeholder="Email address" required>
+        </div>
+
+        <div class="input-box">
+            <span class="icon">🔒</span>
+            <input type="password" placeholder="Password" required>
+        </div>
+
+        <button type="submit" class="primary-btn">Register</button>
+    </form>
+
+    <p class="switch-text">
+        Already have an account?
+        <a href="{{ url_for('login') }}" class="link">Login</a>
+    </p>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,163 @@
+/* ===== RESET ===== */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* ===== PAGE BACKGROUND ===== */
+body{
+    background: url("/static/images/dna-bg.png") no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* ===== LAYOUT ===== */
+.container{
+    display:flex;
+    min-height:100vh;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+    width:260px;
+    background:#0b1c3d;
+    color:white;
+    padding:25px 18px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.logo{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.logo img{
+    width:120px;
+    border-radius:12px;
+}
+
+.logo h2{
+    margin-top:10px;
+}
+
+/* MENU */
+.menu{
+    list-style:none;
+}
+
+.menu li{
+    margin:12px 0;
+}
+
+.menu a{
+    text-decoration:none;
+    color:white;
+    padding:12px 14px;
+    display:block;
+    border-radius:8px;
+    transition:0.2s;
+}
+
+.menu a:hover,
+.menu a.active{
+    background:#3f73d8;
+}
+
+/* PROFILE */
+.profile{
+    font-size:14px;
+    opacity:0.9;
+}
+
+/* ===== MAIN ===== */
+.main{
+    flex:1;
+    padding:40px;
+    color:white;
+}
+
+/* SEARCH + ICONS */
+.topbar{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.search{
+    padding:12px 15px;
+    border-radius:10px;
+    border:none;
+    width:260px;
+}
+
+.icons{
+    font-size:22px;
+    margin-left:5px;
+}
+
+/* ===== HEADINGS ===== */
+.main h1{
+    margin-bottom:5px;
+}
+
+.sub{
+    margin-bottom:25px;
+    opacity:0.9;
+}
+
+/* ===== WHITE CARDS ===== */
+.cards{
+    display:flex;
+    gap:25px;
+    margin-bottom:25px;
+}
+
+.card{
+    background:white;
+    color:#0b1c3d;
+    padding:25px;
+    border-radius:14px;
+    width:220px;
+    text-align:center;
+    border:2px solid #3f73d8;
+    box-shadow:0 6px 20px rgba(0,0,0,0.15);
+}
+
+.card h3{
+    margin-bottom:10px;
+    color:#555;
+}
+
+.card p{
+    font-size:22px;
+    font-weight:bold;
+}
+
+/* ===== BUTTON ===== */
+.btn{
+    background:#3f73d8;
+    color:white;
+    padding:14px 26px;
+    text-decoration:none;
+    border-radius:10px;
+    display:inline-block;
+    margin-bottom:25px;
+}
+
+.btn:hover{
+    background:#2f5cc0;
+}
+
+/* ===== RECENT BOX ===== */
+.recent{
+    background:white;
+    color:#0b1c3d;
+    padding:25px;
+    border-radius:14px;
+    border:2px solid #3f73d8;
+    box-shadow:0 6px 20px rgba(0,0,0,0.15);
+}

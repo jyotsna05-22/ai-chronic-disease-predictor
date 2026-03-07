@@ -67,17 +67,10 @@ It stores:
 
 ## Screenshots
 
-### Home Page
-![Home Page](screenshots/home.png)
-
-### Login Page
-![Login Page](screenshots/login.png)
-
-### Dashboard
-![Dashboard](screenshots/dashboard.png)
-
-### Prediction Result
-![Prediction Result](screenshots/result.png)
+![Home Page](home.png)
+![Login Page](login.png)
+![Dashboard](dashboard.png)
+![Prediction Result](results.png)
 
 ---
 

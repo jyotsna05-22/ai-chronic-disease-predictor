@@ -4,8 +4,8 @@
 ![Flask](https://img.shields.io/badge/Framework-Flask-black)
 ![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Scikit--Learn-orange)
 ![Database](https://img.shields.io/badge/Database-SQLite-lightgrey)
-![Frontend](https://img.shields.io/badge/Frontend-HTML%20CSS-blue)
-![Status](https://img.shields.io/badge/Project-Completed-success)
+
+[![View Project](https://img.shields.io/badge/View-Project-blue?style=for-the-badge)](https://github.com/jyotsna05-22/ai-chronic-disease-predictor)
 
 AI-powered web application for predicting chronic disease risk using machine learning and patient health data.
 

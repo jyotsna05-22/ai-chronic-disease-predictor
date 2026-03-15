@@ -79,17 +79,35 @@ ChronoPreCure demonstrates how machine learning and web technologies can be comb
 
 ## Screenshots
 
-### Home Page
-![Home Page](home.png)
+<table>
+<tr>
+<td align="center">
+<b>Home Page</b><br>
+<img src="home.png" width="400">
+</td>
 
-### Login Page
-![Login Page](login.png)
+<td align="center">
+<b>Login Page</b><br>
+<img src="login.png" width="400">
+</td>
+</tr>
 
-### Dashboard
-![Dashboard](dashboard.png)
+<tr>
+<td align="center">
+<b>Dashboard</b><br>
+<img src="dashboard.png" width="400">
+</td>
 
-### Prediction Result
-![Prediction Result](results.png)
+<td align="center">
+<b>Prediction Result</b><br>
+<img src="results.png" width="400">
+</td>
+</tr>
 
-### Diet Plan Page
-![Diet Plan](diet_plan.png)
+<tr>
+<td align="center">
+<b>Diet Plan Page</b><br>
+<img src="diet_plan.png" width="400">
+</td>
+</tr>
+</table>

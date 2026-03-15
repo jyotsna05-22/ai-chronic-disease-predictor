@@ -87,3 +87,6 @@ ChronoPreCure demonstrates how machine learning and web technologies can be comb
 
 ### Dashboard
 ![Dashboard](dashboard.png)
+
+### Prediction Result
+![Prediction Result](result.png)

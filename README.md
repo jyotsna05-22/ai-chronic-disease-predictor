@@ -1,91 +1,78 @@
-# AI Chronic Disease Predictor
+# ChronoPreCure – AI Chronic Disease Predictor
 
-This project is an AI-based system that predicts possible chronic diseases using patient health data.
-
-The system collects health parameters from the user and uses machine learning models to analyze the risk of diseases such as heart disease, kidney disease, liver disease, and others.
+## Overview
+ChronoPreCure is an AI-powered web application that predicts chronic disease risk using patient health data and machine learning.
 
 ## Features
-
-- User registration and login system
-- Health assessment questionnaire
-- Machine learning based disease prediction
-- Dashboard showing prediction results
+- User login and registration
+- Health assessment form
+- Disease risk prediction
+- Dashboard with results
 - Diet plan suggestions
-- User profile management
-- Statistics and health analysis
+- Responsive UI
 
 ## Technologies Used
-
 - Python
 - Flask
-- Machine Learning
 - HTML
 - CSS
-- SQLite Database
+- SQLite
+- Machine Learning
 
 ## Project Structure
-## Machine Learning Models
+- app.py
+- templates/
+- static/
+- models/
+- datasets/
+- instance/
 
-The system uses trained machine learning models to predict the probability of chronic diseases.
+## How to Run
+1. Clone the repository
+2. Install dependencies
+3. Run `python app.py`
 
-The datasets used include:
+## Output
+The system predicts disease risk based on input health data and displays the result on the dashboard.
 
-- Heart Disease Dataset
-- Kidney Disease Dataset
-- Liver Disease Dataset
+## System Architecture
 
-The models are trained using Python and stored inside the **models/** directory.
+The ChronoPreCure system follows a simple three-layer architecture.
 
-The script `train_models.py` is used to train and update the machine learning models.
+Frontend Layer  
+The user interface is built using HTML and CSS. It allows users to enter their health details, view predictions, and navigate through different pages of the application.
 
----
+Backend Layer  
+The backend is developed using Python Flask. It handles routing, user input processing, and communication between the frontend and the machine learning model.
 
-## System Workflow
+Machine Learning Layer  
+The trained model processes the input health data and predicts the risk of chronic diseases based on patterns learned from the dataset.
 
-1. User registers and logs into the system.
-2. The user fills out a health assessment questionnaire.
-3. The system processes the input data.
-4. The trained machine learning model analyzes the data.
-5. The system predicts the possible disease risk.
-6. Results are displayed on the user dashboard.
-7. The system provides diet plan suggestions based on the results.
 
----
+## Implementation
 
-## Database
+The system collects health parameters from the user through a web form. These inputs are processed and converted into a format suitable for the trained machine learning model. The model then predicts the probability of disease risk and returns the result to the Flask backend, which displays the prediction on the dashboard.
 
-The project uses **SQLite database** to store user data.
+The trained model and preprocessing encoders are stored as serialized files and loaded during application runtime for fast prediction.
 
-It stores:
 
-- User registration information
-- Login credentials
-- Health assessment results
-- Prediction history
+## Advantages
 
----
+• Provides early risk prediction for chronic diseases  
+• Simple and user-friendly web interface  
+• Quick prediction using trained machine learning models  
+• Helps users become more aware of their health conditions
 
-## Screenshots
 
-![Home Page](home.png)
-![Login Page](login.png)
-![Dashboard](dashboard.png)
-![Prediction Result](results.png)
+## Future Scope
 
----
+• Integrating more diseases for prediction  
+• Improving accuracy using advanced machine learning models  
+• Adding real-time health monitoring using wearable devices  
+• Implementing an AI chatbot to provide health guidance  
+• Deploying the system on cloud platforms for wider accessibility
 
-## Author
 
-Jyotsna Pajuri
+## Conclusion
 
-Final Year Student interested in AI, Data Analysis, and Machine Learning.
-
----
-
-## Future Improvements
-
-- Improve prediction accuracy with advanced models
-- Add more chronic diseases
-- Add graphical health reports
-- Deploy the system as a cloud-based web application
-
+ChronoPreCure demonstrates how machine learning and web technologies can be combined to build an intelligent health prediction system. The application helps users understand potential disease risks early and encourages proactive health management.

@@ -1,5 +1,14 @@
 # ChronoPreCure – AI Chronic Disease Predictor
 
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![Flask](https://img.shields.io/badge/Framework-Flask-black)
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Scikit--Learn-orange)
+![Database](https://img.shields.io/badge/Database-SQLite-lightgrey)
+![Frontend](https://img.shields.io/badge/Frontend-HTML%20CSS-blue)
+![Status](https://img.shields.io/badge/Project-Completed-success)
+
+AI-powered web application for predicting chronic disease risk using machine learning and patient health data.
+
 ## Overview
 ChronoPreCure is an AI-powered web application that predicts chronic disease risk using patient health data and machine learning.
 

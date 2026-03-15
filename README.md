@@ -76,3 +76,14 @@ The trained model and preprocessing encoders are stored as serialized files and 
 ## Conclusion
 
 ChronoPreCure demonstrates how machine learning and web technologies can be combined to build an intelligent health prediction system. The application helps users understand potential disease risks early and encourages proactive health management.
+
+## Screenshots
+
+### Home Page
+![Home Page](home.png)
+
+### Login Page
+![Login Page](login.png)
+
+### Dashboard
+![Dashboard](dashboard.png)

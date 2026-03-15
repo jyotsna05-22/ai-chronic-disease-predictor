@@ -1,16 +1,21 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from datetime import datetime
 import sqlite3
+import os
+import joblib
+import pandas as pd
 
 app = Flask(__name__)
 app.secret_key = "secret123"
 
-DB_NAME = "chronoprecure.db"
+DB_NAME = "instance/health.db"
+MODEL_FILE = "models/chronoprecure_model.pkl"
+ENCODERS_FILE = "models/chronoprecure_encoders.pkl"
+
 last_result = {}
 
 # ---------------- DIET DATABASE ----------------
 diet_database = {
-
     "Healthy": {
         "Monday": {"veg": "Oats + Fruits + Almond Milk", "nonveg": "Boiled Eggs + Whole Wheat Toast"},
         "Tuesday": {"veg": "Vegetable Soup + Multigrain Roti", "nonveg": "Grilled Chicken + Salad"},
@@ -20,7 +25,6 @@ diet_database = {
         "Saturday": {"veg": "Mixed Vegetable Curry + Chapati", "nonveg": "Grilled Fish + Salad"},
         "Sunday": {"veg": "Vegetable Biryani (Low Oil) + Raita", "nonveg": "Chicken Biryani (Low Oil)"}
     },
-
     "Diabetes": {
         "Monday": {"veg": "Oats + Chia Seeds + Cinnamon", "nonveg": "Boiled Eggs + Cucumber Salad"},
         "Tuesday": {"veg": "Sprouts Salad + Multigrain Roti", "nonveg": "Grilled Chicken + Salad"},
@@ -30,7 +34,6 @@ diet_database = {
         "Saturday": {"veg": "Vegetable Curry + Chapati", "nonveg": "Grilled Fish + Steamed Veg"},
         "Sunday": {"veg": "Vegetable Khichdi + Curd", "nonveg": "Chicken Curry + Salad"}
     },
-
     "Heart Disease": {
         "Monday": {"veg": "Oats + Apple + Flaxseeds", "nonveg": "Boiled Eggs + Oats"},
         "Tuesday": {"veg": "Vegetable Soup (Low Salt) + Roti", "nonveg": "Grilled Chicken (No Skin) + Salad"},
@@ -40,7 +43,6 @@ diet_database = {
         "Saturday": {"veg": "Mixed Veg + Chapati + Curd", "nonveg": "Grilled Fish + Veg"},
         "Sunday": {"veg": "Vegetable Upma + Buttermilk", "nonveg": "Chicken + Salad"}
     },
-
     "Liver Disease": {
         "Monday": {"veg": "Oats + Banana", "nonveg": "Boiled Eggs + Papaya"},
         "Tuesday": {"veg": "Vegetable Soup + Roti", "nonveg": "Grilled Chicken + Steamed Veg"},
@@ -50,7 +52,6 @@ diet_database = {
         "Saturday": {"veg": "Vegetable Curry + Chapati", "nonveg": "Grilled Fish + Salad"},
         "Sunday": {"veg": "Vegetable Khichdi + Curd", "nonveg": "Chicken Stew + Salad"}
     },
-
     "Kidney Disease": {
         "Monday": {"veg": "Oats (Small Portion) + Apple", "nonveg": "Egg Whites + Salad"},
         "Tuesday": {"veg": "Vegetable Soup (Low Salt) + Roti", "nonveg": "Grilled Chicken (Small Portion)"},
@@ -60,7 +61,6 @@ diet_database = {
         "Saturday": {"veg": "Vegetable Curry + Chapati", "nonveg": "Fish + Steamed Veg"},
         "Sunday": {"veg": "Vegetable Upma + Curd", "nonveg": "Chicken (Small Portion) + Salad"}
     },
-
     "Obesity": {
         "Monday": {"veg": "Oats + Fruits (No Sugar)", "nonveg": "Egg Whites + Green Tea"},
         "Tuesday": {"veg": "Vegetable Soup + Salad", "nonveg": "Grilled Chicken Salad"},
@@ -70,7 +70,6 @@ diet_database = {
         "Saturday": {"veg": "Mixed Veg + Chapati", "nonveg": "Grilled Fish + Veg"},
         "Sunday": {"veg": "Vegetable Soup + Sprouts", "nonveg": "Chicken Soup + Salad"}
     },
-
     "Asthma": {
         "Monday": {"veg": "Oats + Warm Water", "nonveg": "Boiled Eggs + Ginger Tea"},
         "Tuesday": {"veg": "Vegetable Soup + Roti", "nonveg": "Grilled Chicken + Soup"},
@@ -80,7 +79,6 @@ diet_database = {
         "Saturday": {"veg": "Vegetable Curry + Chapati", "nonveg": "Grilled Fish"},
         "Sunday": {"veg": "Vegetable Khichdi", "nonveg": "Chicken Stew"}
     },
-
     "Arthritis": {
         "Monday": {"veg": "Oats + Banana + Flaxseeds", "nonveg": "Boiled Eggs + Nuts"},
         "Tuesday": {"veg": "Vegetable Soup + Roti", "nonveg": "Grilled Chicken + Salad"},
@@ -90,7 +88,6 @@ diet_database = {
         "Saturday": {"veg": "Mixed Veg + Chapati", "nonveg": "Grilled Fish"},
         "Sunday": {"veg": "Vegetable Khichdi + Curd", "nonveg": "Chicken + Salad"}
     },
-
     "Cancer Risk": {
         "Monday": {"veg": "Oats + Almond Milk + Berries", "nonveg": "Boiled Eggs + Fruits"},
         "Tuesday": {"veg": "Vegetable Soup + Salad", "nonveg": "Grilled Chicken + Salad"},
@@ -100,7 +97,6 @@ diet_database = {
         "Saturday": {"veg": "Mixed Veg + Chapati", "nonveg": "Fish + Veg"},
         "Sunday": {"veg": "Vegetable Upma + Salad", "nonveg": "Chicken + Veg"}
     },
-
     "Stroke Risk": {
         "Monday": {"veg": "Oats + Apple + Flaxseeds", "nonveg": "Boiled Eggs + Salad"},
         "Tuesday": {"veg": "Vegetable Soup (Low Salt)", "nonveg": "Grilled Chicken + Salad"},
@@ -114,283 +110,273 @@ diet_database = {
 
 # ---------------- ADVICE DATABASE ----------------
 advice_database = {
-
     "Healthy": {
         "prevention": [
-            "Maintain a balanced plate daily with vegetables, protein, fruits, and whole grains for long-term wellness.",
-            "Drink enough water every day and reduce sugary beverages to protect metabolism and kidney health.",
-            "Do at least 30 minutes of physical activity such as walking, yoga, or cycling to keep the body active.",
-            "Get regular health checkups for blood pressure, sugar, and cholesterol to detect issues early.",
-            "Sleep 7–8 hours consistently because good sleep supports immunity, hormones, and body recovery.",
-            "Avoid smoking and limit alcohol because both increase future chronic disease risk."
+            "Maintain a balanced diet daily.",
+            "Drink enough water every day.",
+            "Exercise at least 30 minutes daily.",
+            "Go for regular health checkups.",
+            "Sleep 7 to 8 hours every night.",
+            "Avoid smoking and alcohol."
         ],
         "lifestyle": [
-            "Start your day with light movement such as stretching or a short walk to improve circulation.",
-            "Follow regular meal timings and avoid late-night heavy eating for better digestion and energy control.",
-            "Practice stress management like meditation or deep breathing to protect mental and physical health.",
-            "Choose home-cooked food more often and reduce packed, fried, and processed snacks.",
-            "Maintain a healthy body weight through portion control and balanced food choices.",
-            "Take short breaks during long sitting periods to reduce stiffness and improve blood flow."
+            "Start the day with light stretching.",
+            "Avoid late-night heavy meals.",
+            "Manage stress with breathing exercises.",
+            "Prefer home-cooked food.",
+            "Maintain healthy body weight.",
+            "Avoid sitting continuously for long hours."
         ],
         "urgent": [
-            "Seek urgent medical help if you experience sudden chest pain, severe breathlessness, or fainting.",
-            "Go to the hospital immediately if weakness, confusion, or severe dizziness occurs suddenly.",
-            "Persistent high fever, dehydration, or repeated vomiting should not be ignored.",
-            "Any sudden severe headache or blurred vision needs prompt medical evaluation.",
-            "Swelling of face, lips, or severe allergy signs need emergency care.",
-            "If symptoms worsen rapidly, do not wait—consult a doctor immediately."
+            "If you feel sudden severe chest pain, go to hospital immediately.",
+            "Do not ignore fainting or severe dizziness.",
+            "Persistent high fever needs medical help.",
+            "Sudden blurred vision needs urgent checkup.",
+            "Severe swelling or allergy needs emergency care.",
+            "If symptoms worsen rapidly, meet doctor immediately."
         ],
-        "exercise": ["Brisk Walking", "Yoga", "Cycling", "Light Strength Training", "Stretching"]
+        "exercise": ["Walking", "Yoga", "Cycling", "Stretching", "Light Strength Training"]
     },
-
     "Diabetes": {
         "prevention": [
-            "Reduce sweets, sugary drinks, and refined carbohydrates, and choose whole grains instead.",
-            "Eat high-fiber foods like vegetables, oats, dals, and sprouts to slow glucose spikes.",
-            "Maintain a healthy body weight because weight control improves insulin sensitivity.",
-            "Check blood sugar regularly and follow medication or insulin plans consistently.",
-            "Avoid smoking and reduce alcohol intake as both worsen blood vessel and nerve damage.",
-            "Have regular eye, kidney, and foot checkups to catch complications early."
+            "Reduce sugar and refined carbohydrates.",
+            "Eat more fiber-rich foods.",
+            "Maintain healthy body weight.",
+            "Check blood sugar regularly.",
+            "Avoid smoking and reduce alcohol.",
+            "Go for eye, kidney, and foot checkups."
         ],
         "lifestyle": [
-            "Walk for 20–40 minutes after meals, especially after dinner, to improve glucose control.",
-            "Eat small, balanced meals at regular times and do not skip breakfast.",
-            "Sleep 7–8 hours because poor sleep increases insulin resistance and appetite.",
-            "Manage stress with yoga, meditation, or breathing exercises because stress raises sugar levels.",
-            "Drink enough water daily and avoid packaged juices or soft drinks.",
-            "Use low-GI foods like millets, oats, and brown rice while controlling portions."
+            "Walk after meals.",
+            "Eat meals on time.",
+            "Sleep properly every night.",
+            "Manage stress daily.",
+            "Drink enough water.",
+            "Use low-GI foods in diet."
         ],
         "urgent": [
-            "Get urgent medical help if sugar levels stay very high with weakness, nausea, or vomiting.",
-            "Seek emergency care if you develop confusion, fainting, seizures, or very low sugar symptoms.",
-            "Blurred vision, severe dizziness, or dehydration signs need fast medical evaluation.",
-            "Any non-healing wound, foot infection, or black discoloration requires urgent attention.",
-            "Chest pain or sudden breathlessness in diabetes should never be ignored.",
-            "Repeated severe sweating, shaking, or collapse needs immediate hospital care."
+            "Very high sugar with weakness needs urgent help.",
+            "Confusion or fainting needs emergency care.",
+            "Blurred vision and dehydration need fast medical help.",
+            "Non-healing wounds need urgent attention.",
+            "Chest pain should not be ignored.",
+            "Severe sweating or collapse needs emergency care."
         ],
-        "exercise": ["Brisk Walking", "Cycling", "Yoga", "Swimming", "Light Jogging"]
+        "exercise": ["Walking", "Cycling", "Yoga", "Swimming", "Light Jogging"]
     },
-
     "Heart Disease": {
         "prevention": [
-            "Reduce salt intake by limiting pickles, chips, instant food, and processed snacks.",
-            "Avoid saturated and trans fats from fried foods, bakery items, and fast food.",
-            "Maintain healthy cholesterol through fiber-rich foods like oats, fruits, and vegetables.",
-            "Stop smoking completely because tobacco damages blood vessels and increases heart attack risk.",
-            "Keep blood pressure and weight under control with regular monitoring and treatment.",
-            "Follow all prescribed medications consistently and do routine cardiac checkups."
+            "Reduce salt intake.",
+            "Avoid oily and fried foods.",
+            "Control cholesterol levels.",
+            "Stop smoking completely.",
+            "Keep BP and weight under control.",
+            "Follow medicines regularly."
         ],
         "lifestyle": [
-            "Walk daily for 30–45 minutes at a moderate pace unless your doctor advises restrictions.",
-            "Choose heart-friendly foods like fruits, salads, dal, nuts, and fish instead of fried meals.",
-            "Practice breathing exercises or meditation daily to reduce stress-related BP spikes.",
-            "Sleep 7–8 hours and avoid very heavy meals late at night.",
-            "Reduce caffeine and energy drinks if palpitations or anxiety increase.",
-            "Avoid long sitting and take movement breaks to support circulation."
+            "Walk daily.",
+            "Choose heart-friendly foods.",
+            "Practice meditation or breathing exercises.",
+            "Sleep well.",
+            "Reduce caffeine if needed.",
+            "Avoid long sitting periods."
         ],
         "urgent": [
-            "Call emergency services if chest pressure or pain spreads to the arm, jaw, or back.",
-            "Severe breathlessness, fainting, or extreme sweating needs immediate hospital care.",
-            "Fast irregular heartbeat with dizziness should be checked urgently.",
-            "Swelling in the legs with shortness of breath may signal heart failure and needs care.",
-            "Sudden severe headache with very high BP must be treated urgently.",
-            "Any stroke signs like speech trouble or face drooping require emergency help."
+            "Chest pain spreading to arm or jaw is emergency.",
+            "Severe breathlessness needs hospital care.",
+            "Irregular heartbeat with dizziness needs urgent care.",
+            "Leg swelling with breathlessness needs medical check.",
+            "Sudden severe headache with high BP is serious.",
+            "Stroke signs need emergency help."
         ],
-        "exercise": ["Walking", "Light Cycling", "Yoga (Gentle)", "Breathing Exercises", "Stretching"]
+        "exercise": ["Walking", "Light Cycling", "Gentle Yoga", "Breathing Exercises", "Stretching"]
     },
-
     "Liver Disease": {
         "prevention": [
-            "Avoid alcohol completely because it directly damages liver cells and worsens inflammation.",
-            "Limit oily, fried, and high-sugar foods to reduce fatty liver progression.",
-            "Maintain a healthy weight because obesity strongly increases fatty liver risk.",
-            "Drink clean water and eat hygienic food to prevent hepatitis and infections.",
-            "Take hepatitis vaccination if advised by a doctor and avoid unsafe injections or shared razors.",
-            "Do liver function tests regularly if you have symptoms or known risk factors."
+            "Avoid alcohol completely.",
+            "Reduce oily and high-sugar foods.",
+            "Maintain healthy body weight.",
+            "Drink clean water and eat hygienic food.",
+            "Take vaccinations if advised.",
+            "Do liver function tests when needed."
         ],
         "lifestyle": [
-            "Eat small, light meals and avoid heavy late-night dinners to reduce liver workload.",
-            "Choose lean proteins and increase vegetables while reducing red meat and junk food.",
-            "Stay hydrated and avoid sugary beverages or artificial juices.",
-            "Walk daily for at least 30 minutes to improve metabolism and liver health.",
-            "Sleep properly and reduce stress because metabolic stress affects the liver.",
-            "Avoid self-medication and unnecessary supplements without doctor advice."
+            "Eat small, light meals.",
+            "Increase vegetables and lean proteins.",
+            "Stay hydrated.",
+            "Walk daily.",
+            "Sleep properly.",
+            "Avoid self-medication."
         ],
         "urgent": [
-            "Yellow eyes or skin (jaundice) that appears or worsens needs urgent medical care.",
-            "Severe abdominal pain, vomiting blood, or black stools require emergency attention.",
-            "Confusion, extreme sleepiness, or behavior changes can be serious liver warning signs.",
-            "Swollen abdomen with breathlessness needs urgent evaluation.",
-            "Persistent vomiting, dark urine, or pale stools should be checked quickly.",
-            "High fever with jaundice or severe weakness requires hospital assessment."
+            "Yellow eyes or skin needs urgent medical care.",
+            "Severe abdominal pain needs emergency checkup.",
+            "Vomiting blood is emergency.",
+            "Confusion or extreme drowsiness is serious.",
+            "Dark urine with weakness needs fast checkup.",
+            "High fever with jaundice needs hospital care."
         ],
-        "exercise": ["Walking", "Yoga (Gentle)", "Light Cycling", "Stretching", "Low-Impact Cardio"]
+        "exercise": ["Walking", "Gentle Yoga", "Light Cycling", "Stretching", "Low-Impact Cardio"]
     },
-
     "Kidney Disease": {
         "prevention": [
-            "Control blood pressure and diabetes strictly because both are major kidney damage causes.",
-            "Reduce salt and avoid processed foods to prevent fluid retention and BP strain.",
-            "Drink the right amount of water as advised by your doctor based on kidney status.",
-            "Avoid frequent painkiller use without medical advice because it harms kidney function.",
-            "Do regular kidney tests like creatinine and urine protein if you are at risk.",
-            "Avoid smoking and alcohol because they worsen blood vessel damage and kidney decline."
+            "Control BP and diabetes strictly.",
+            "Reduce salt intake.",
+            "Drink proper amount of water.",
+            "Avoid unnecessary painkiller use.",
+            "Do regular kidney tests.",
+            "Avoid smoking and alcohol."
         ],
         "lifestyle": [
-            "Follow a kidney-friendly diet with controlled salt and balanced protein intake.",
-            "Avoid packaged snacks and highly processed foods that increase sodium load.",
-            "Do light exercise like walking or yoga to improve circulation and blood pressure.",
-            "Sleep 7–8 hours and maintain a steady daily routine to support recovery.",
-            "Track swelling and changes in urination pattern regularly.",
-            "Take prescribed medicines exactly as advised and never self-medicate."
+            "Follow kidney-friendly diet.",
+            "Avoid packaged salty snacks.",
+            "Do light exercise.",
+            "Sleep well.",
+            "Monitor swelling and urination.",
+            "Take medicines regularly."
         ],
         "urgent": [
-            "Go to the hospital if urination becomes very low or stops suddenly.",
-            "Severe swelling in legs or face with breathlessness needs urgent care.",
-            "Persistent vomiting, confusion, or extreme weakness requires immediate evaluation.",
-            "Very high blood pressure with headache or blurred vision is an emergency.",
-            "Blood in urine or severe back pain should be checked urgently.",
-            "Fever with burning urination may indicate infection and needs quick treatment."
+            "Suddenly reduced urination is serious.",
+            "Swelling with breathlessness needs urgent care.",
+            "Vomiting with confusion needs emergency help.",
+            "Very high BP with headache is dangerous.",
+            "Blood in urine needs quick checkup.",
+            "Burning urination with fever needs treatment."
         ],
-        "exercise": ["Walking", "Yoga (Gentle)", "Stretching", "Breathing Exercises", "Light Cycling"]
+        "exercise": ["Walking", "Gentle Yoga", "Stretching", "Breathing Exercises", "Light Cycling"]
     },
-
     "Obesity": {
         "prevention": [
-            "Control portion sizes and avoid sugary drinks because liquid calories cause rapid weight gain.",
-            "Eat more high-fiber foods like vegetables, fruits, salads, and dals to stay full longer.",
-            "Limit daily fried foods, bakery items, and packaged snacks that increase fat storage.",
-            "Track your weight and waist size regularly to notice unhealthy changes early.",
-            "Do at least 150 minutes of exercise per week to prevent progressive weight gain.",
-            "Sleep 7–8 hours because poor sleep increases cravings and hunger hormones."
+            "Control food portions.",
+            "Avoid sugary drinks.",
+            "Eat more vegetables and fruits.",
+            "Avoid daily junk food.",
+            "Exercise regularly.",
+            "Sleep properly."
         ],
         "lifestyle": [
-            "Begin the day with water and a short walk to improve metabolism and appetite control.",
-            "Include protein in every meal to reduce cravings and overeating.",
-            "Avoid emotional eating by managing stress through yoga, journaling, or meditation.",
-            "Replace junk snacks with fruits, sprouts, nuts in small portions, or buttermilk.",
-            "Do strength training 2–3 times weekly to improve metabolism and body composition.",
-            "Avoid screen-time eating and eat slowly to recognize fullness better."
+            "Start the day with water and walking.",
+            "Include protein in meals.",
+            "Manage emotional eating.",
+            "Replace junk food with healthy snacks.",
+            "Do strength training if possible.",
+            "Eat slowly."
         ],
         "urgent": [
-            "See a doctor if breathlessness happens during normal walking or climbing stairs.",
-            "Chest pain, fainting, or extreme fatigue in obesity needs urgent medical review.",
-            "Loud snoring with daytime sleepiness may indicate sleep apnea and requires evaluation.",
-            "Rapidly worsening joint pain or swelling should be medically assessed.",
-            "Very high BP or high sugar symptoms must be checked immediately.",
-            "Any depression, binge eating, or severe body image distress needs professional help."
+            "Breathlessness during simple walking needs checkup.",
+            "Chest pain needs urgent review.",
+            "Severe tiredness should not be ignored.",
+            "Loud snoring with daytime sleepiness needs checkup.",
+            "Rapid joint pain worsening needs care.",
+            "Very high BP or sugar needs urgent medical help."
         ],
-        "exercise": ["Brisk Walking", "Cycling", "Strength Training (Light)", "Yoga", "Swimming"]
+        "exercise": ["Brisk Walking", "Cycling", "Light Strength Training", "Yoga", "Swimming"]
     },
-
     "Asthma": {
         "prevention": [
-            "Avoid triggers like dust, smoke, strong perfumes, cold air, and polluted environments.",
-            "Use inhalers and controller medicines exactly as prescribed and do not skip them.",
-            "Keep your room and bedding clean to reduce dust mites and allergen exposure.",
-            "Take preventive measures during seasonal infections because colds often trigger attacks.",
-            "Warm up before exercise and avoid heavy activity in cold air without precautions.",
-            "Get regular follow-up with your doctor to review symptoms and inhaler technique."
+            "Avoid dust, smoke, and strong perfume.",
+            "Use inhalers regularly if prescribed.",
+            "Keep room and bedding clean.",
+            "Avoid cold triggers.",
+            "Be careful during seasonal infections.",
+            "Go for regular follow-up."
         ],
         "lifestyle": [
-            "Practice breathing exercises daily to improve lung control and reduce panic during symptoms.",
-            "Do gentle yoga and stretching because it helps breathing and lowers stress.",
-            "Drink warm water or warm herbal fluids if cold drinks trigger symptoms.",
-            "Sleep with your head slightly elevated if night cough or wheezing increases.",
-            "Maintain a healthy diet and avoid known food triggers if any worsen symptoms.",
-            "Always keep your rescue inhaler accessible and learn your early warning signs."
+            "Practice breathing exercises.",
+            "Do gentle yoga.",
+            "Drink warm water.",
+            "Sleep with head slightly raised if needed.",
+            "Avoid known triggers.",
+            "Keep rescue inhaler nearby."
         ],
         "urgent": [
-            "Emergency if severe breathlessness or chest tightness makes it hard to speak.",
-            "Blue lips, nails, or severe wheezing needs immediate hospital care.",
-            "If your rescue inhaler is not helping after repeated use, go to emergency.",
-            "Rapid breathing with panic or sweating requires urgent medical attention.",
-            "Severe cough with fever may signal infection and needs medical evaluation.",
-            "Any fainting, collapse, or extreme fatigue during an attack is an emergency."
+            "Severe breathlessness is emergency.",
+            "Blue lips or nails need urgent care.",
+            "If inhaler is not helping, go to hospital.",
+            "Fast breathing with panic needs immediate care.",
+            "Cough with fever needs medical check.",
+            "Collapse during attack is emergency."
         ],
-        "exercise": ["Breathing Exercises", "Walking (Moderate)", "Yoga (Pranayama)", "Light Cycling", "Stretching"]
+        "exercise": ["Breathing Exercises", "Walking", "Pranayama", "Light Cycling", "Stretching"]
     },
-
     "Arthritis": {
         "prevention": [
-            "Maintain a healthy body weight because extra weight increases pressure on the joints.",
-            "Do joint-friendly exercises regularly to preserve mobility and reduce stiffness.",
-            "Avoid repetitive strain and use correct posture while sitting, standing, and working.",
-            "Eat anti-inflammatory foods such as fish, nuts, seeds, turmeric, and vegetables.",
-            "Use supportive footwear and avoid standing for too long without breaks.",
-            "Get early medical advice when swelling or pain persists to slow joint damage."
+            "Maintain healthy body weight.",
+            "Do joint-friendly exercise.",
+            "Avoid repetitive strain.",
+            "Eat anti-inflammatory foods.",
+            "Use supportive footwear.",
+            "Get early treatment for persistent joint pain."
         ],
         "lifestyle": [
-            "Start the day with gentle stretching and warm-up to reduce morning stiffness.",
-            "Use warm compresses or warm baths for stiffness relief and easier joint movement.",
-            "Take breaks during long sitting periods to avoid joint locking and pain.",
-            "Sleep properly and reduce stress because stress worsens pain sensitivity.",
-            "Avoid excessive stairs, squatting, or lifting if knee or back joints are affected.",
-            "Strengthen surrounding muscles with guided low-impact exercises."
+            "Do morning stretching.",
+            "Use warm compress for stiffness.",
+            "Avoid sitting too long.",
+            "Sleep properly.",
+            "Reduce stress.",
+            "Avoid excessive stairs if painful."
         ],
         "urgent": [
-            "Seek urgent care if a joint becomes very swollen, red, hot, and painful suddenly.",
-            "High fever with joint pain may suggest infection and needs fast treatment.",
-            "Sudden inability to move a joint or severe deformity requires immediate care.",
-            "Pain that is not relieved with medicine or rest should be checked urgently.",
-            "Numbness or tingling with back or neck pain needs medical evaluation.",
-            "Any severe pain after a fall or injury should not be ignored."
+            "Red, swollen, hot joint needs urgent care.",
+            "High fever with joint pain is serious.",
+            "Sudden inability to move joint needs checkup.",
+            "Severe pain not relieved by rest needs medical help.",
+            "Numbness with pain needs evaluation.",
+            "Severe pain after fall should not be ignored."
         ],
         "exercise": ["Stretching", "Yoga", "Swimming", "Walking", "Low-Impact Strengthening"]
     },
-
     "Cancer Risk": {
         "prevention": [
-            "Avoid tobacco in all forms because it is one of the strongest cancer risk factors.",
-            "Limit alcohol and reduce processed meats, fried foods, and heavily packaged foods.",
-            "Eat more antioxidant-rich foods like vegetables, fruits, nuts, and seeds daily.",
-            "Maintain healthy weight and stay active because obesity increases several cancer risks.",
-            "Protect yourself from excessive sun exposure and use sunscreen when needed.",
-            "Do screening tests regularly if you have family history or persistent symptoms."
+            "Avoid tobacco completely.",
+            "Limit alcohol.",
+            "Eat more fruits and vegetables.",
+            "Maintain healthy body weight.",
+            "Stay physically active.",
+            "Go for screening if advised."
         ],
         "lifestyle": [
-            "Follow a nutrient-rich diet with protein, vegetables, and fruits to support healthy cells.",
-            "Stay physically active through walking, yoga, or gentle exercise every day.",
-            "Reduce chronic stress and improve emotional health because immunity is affected by stress.",
-            "Sleep consistently and avoid long periods of exhaustion or irregular lifestyle.",
-            "Drink enough water and avoid frequent outside junk food or smoked foods.",
-            "Reduce repeated exposure to harmful smoke, chemicals, and polluted environments."
+            "Eat nutrient-rich foods.",
+            "Walk daily.",
+            "Reduce stress.",
+            "Sleep consistently.",
+            "Drink enough water.",
+            "Avoid repeated exposure to harmful smoke."
         ],
         "urgent": [
-            "See a doctor if unexplained weight loss occurs without dieting or exercise change.",
-            "Persistent lump or swelling anywhere in the body should be checked quickly.",
-            "Unusual bleeding, chronic cough, or non-healing wounds require evaluation.",
-            "Continuous fatigue, appetite loss, or long-lasting pain needs medical consultation.",
-            "Sudden major change in bowel habits or swallowing difficulty needs urgent review.",
-            "Any symptom that persists for weeks should be evaluated instead of delayed."
+            "Unexplained weight loss needs checkup.",
+            "Persistent lump needs urgent evaluation.",
+            "Unusual bleeding needs medical attention.",
+            "Long-lasting fatigue should be checked.",
+            "Persistent cough or wound needs checkup.",
+            "Symptoms lasting weeks should not be ignored."
         ],
         "exercise": ["Walking", "Yoga", "Stretching", "Light Cardio", "Breathing Exercises"]
     },
-
     "Stroke Risk": {
         "prevention": [
-            "Control blood pressure strictly because high BP is the biggest stroke risk factor.",
-            "Reduce salt and avoid processed snacks, pickles, and packaged foods daily.",
-            "Maintain healthy cholesterol by reducing fried food and increasing fiber intake.",
-            "Avoid smoking completely and limit alcohol because both damage blood vessels.",
-            "Manage diabetes and obesity properly to reduce clot and artery damage risk.",
-            "Do regular BP, sugar, and cholesterol checks and follow medicines consistently."
+            "Control blood pressure strictly.",
+            "Reduce salt and processed food.",
+            "Control cholesterol.",
+            "Avoid smoking.",
+            "Control diabetes and obesity.",
+            "Take medicines regularly."
         ],
         "lifestyle": [
-            "Walk daily for 30–45 minutes to improve circulation and control blood pressure.",
-            "Sleep 7–8 hours and avoid heavy late-night eating to reduce metabolic strain.",
-            "Reduce stress using meditation or breathing exercises because stress spikes BP.",
-            "Drink enough water and avoid dehydration which can worsen clot risk.",
-            "Avoid sitting too long and stretch every hour to support blood flow.",
-            "Follow regular meals and reduce junk food to protect heart and brain vessels."
+            "Walk daily.",
+            "Sleep properly.",
+            "Reduce stress.",
+            "Drink enough water.",
+            "Avoid sitting too long.",
+            "Eat balanced meals."
         ],
         "urgent": [
-            "Emergency if face drooping, arm weakness, or speech difficulty occurs suddenly.",
-            "Sudden vision loss, severe dizziness, or balance loss needs immediate hospital care.",
-            "A severe sudden headache can be dangerous and needs urgent evaluation.",
-            "Numbness on one side of the body should be treated as an emergency.",
-            "Confusion, fainting, or sudden severe weakness requires immediate medical attention.",
-            "Do not wait for symptoms to improve—stroke treatment works best when started early."
+            "Face drooping, arm weakness, or speech trouble is emergency.",
+            "Sudden vision loss needs hospital care.",
+            "Severe sudden headache is dangerous.",
+            "One-side numbness is emergency.",
+            "Confusion or fainting needs immediate attention.",
+            "Do not wait if stroke signs appear."
         ],
         "exercise": ["Brisk Walking", "Yoga", "Light Cycling", "Stretching", "Breathing Exercises"]
     }
@@ -398,9 +384,11 @@ advice_database = {
 
 # ---------------- DATABASE HELPERS ----------------
 def get_connection():
+    os.makedirs("instance", exist_ok=True)
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def init_db():
     conn = get_connection()
@@ -440,6 +428,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def get_profile():
     conn = get_connection()
     cur = conn.cursor()
@@ -449,12 +438,12 @@ def get_profile():
 
     if row:
         return {
-            "name": row["name"] or "User",
-            "email": row["email"] or "user@email.com",
-            "age": row["age"] or "",
-            "height": row["height"] or "",
-            "weight": row["weight"] or "",
-            "member_since": row["member_since"] or "2026"
+            "name": row["name"] if row["name"] else "User",
+            "email": row["email"] if row["email"] else "user@email.com",
+            "age": row["age"] if row["age"] else "",
+            "height": row["height"] if row["height"] else "",
+            "weight": row["weight"] if row["weight"] else "",
+            "member_since": row["member_since"] if row["member_since"] else "2026"
         }
 
     return {
@@ -466,16 +455,23 @@ def get_profile():
         "member_since": "2026"
     }
 
+
 def save_profile(name, email, age, height, weight):
     conn = get_connection()
     cur = conn.cursor()
+
+    cur.execute("SELECT member_since FROM profiles WHERE id = 1")
+    existing = cur.fetchone()
+    member_since = existing["member_since"] if existing and existing["member_since"] else "2026"
+
     cur.execute("""
-        UPDATE profiles
-        SET name = ?, email = ?, age = ?, height = ?, weight = ?
-        WHERE id = 1
-    """, (name, email, age, height, weight))
+        INSERT OR REPLACE INTO profiles (id, name, email, age, height, weight, member_since)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (1, name, email, age, height, weight, member_since))
+
     conn.commit()
     conn.close()
+
 
 def save_assessment(disease, risk, bmi, date_text):
     conn = get_connection()
@@ -486,6 +482,7 @@ def save_assessment(disease, risk, bmi, date_text):
     """, (disease, risk, bmi, date_text))
     conn.commit()
     conn.close()
+
 
 def get_recent_assessments(limit=5):
     conn = get_connection()
@@ -500,6 +497,7 @@ def get_recent_assessments(limit=5):
     conn.close()
     return [dict(row) for row in rows]
 
+
 def get_total_assessments():
     conn = get_connection()
     cur = conn.cursor()
@@ -507,6 +505,7 @@ def get_total_assessments():
     row = cur.fetchone()
     conn.close()
     return row["count"] if row else 0
+
 
 def get_latest_assessment():
     conn = get_connection()
@@ -520,6 +519,7 @@ def get_latest_assessment():
     row = cur.fetchone()
     conn.close()
     return dict(row) if row else None
+
 
 def build_result(disease, risk, bmi, date_text):
     advice = advice_database.get(disease, advice_database["Healthy"])
@@ -536,35 +536,233 @@ def build_result(disease, risk, bmi, date_text):
         "advice": advice
     }
 
-# initialize database once
+# ---------------- MODEL HELPERS ----------------
+FEATURE_COLUMNS = [
+    "age", "gender", "height_cm", "weight_kg", "bmi", "blood_pressure",
+    "glucose", "cholesterol", "smoking", "alcohol", "exercise",
+    "sleep_hours", "chest_pain", "breathing_difficulty", "joint_pain",
+    "fatigue", "mood_stress", "pregnant", "pregnancy_month"
+]
+
+CATEGORICAL_COLUMNS = [
+    "gender", "smoking", "alcohol", "exercise", "chest_pain",
+    "breathing_difficulty", "joint_pain", "fatigue", "mood_stress", "pregnant"
+]
+
+
+def load_model_and_encoders():
+    if not os.path.exists(MODEL_FILE) or not os.path.exists(ENCODERS_FILE):
+        raise FileNotFoundError("Trained model not found. Please run: python train_models.py")
+    model = joblib.load(MODEL_FILE)
+    encoders = joblib.load(ENCODERS_FILE)
+    return model, encoders
+
+
+def safe_encode(encoders, column_name, value):
+    value = str(value).strip().lower()
+    le = encoders[column_name]
+    if value in le.classes_:
+        return int(le.transform([value])[0])
+    return int(le.transform([le.classes_[0]])[0])
+
+
+def prepare_input_data(form_data, encoders):
+    input_df = pd.DataFrame([form_data])
+    for col in CATEGORICAL_COLUMNS:
+        input_df[col] = input_df[col].apply(lambda x: safe_encode(encoders, col, x))
+    input_df = input_df[FEATURE_COLUMNS]
+    return input_df
+
+
+def get_risk_from_probability(probability_percent):
+    if probability_percent >= 65:
+        return "High"
+    elif probability_percent >= 40:
+        return "Medium"
+    return "Low"
+
+# ---------------- CHATBOT ----------------
+disease_info = {
+    "Diabetes": "Diabetes is a condition where blood sugar levels become too high and need regular monitoring, diet control, and exercise.",
+    "Heart Disease": "Heart disease is related to reduced heart health and may be associated with high blood pressure, cholesterol, chest pain, and unhealthy lifestyle.",
+    "Liver Disease": "Liver disease affects the liver's ability to process nutrients and remove toxins. Healthy food and avoiding alcohol are important.",
+    "Kidney Disease": "Kidney disease affects the body's filtration system and is often linked with blood pressure, diabetes, and poor kidney function.",
+    "Obesity": "Obesity means excess body weight or body fat, which can increase the risk of diabetes, heart disease, and other health problems.",
+    "Asthma": "Asthma affects breathing and airways, often causing wheezing, breathlessness, chest tightness, or cough.",
+    "Arthritis": "Arthritis causes joint pain, swelling, and stiffness. Lifestyle care and gentle exercise are often helpful.",
+    "Cancer Risk": "Cancer risk refers to patterns that may increase the chance of abnormal cell growth and needs medical screening when symptoms persist.",
+    "Stroke Risk": "Stroke risk is related to reduced blood supply to the brain and is strongly linked to blood pressure, cholesterol, diabetes, and smoking.",
+    "Healthy": "Healthy means your result currently does not indicate a major disease risk pattern, but regular healthy habits are still important."
+}
+
+disease_map = {
+    "diabetes": "Diabetes",
+    "heart disease": "Heart Disease",
+    "heart": "Heart Disease",
+    "liver disease": "Liver Disease",
+    "liver": "Liver Disease",
+    "kidney disease": "Kidney Disease",
+    "kidney": "Kidney Disease",
+    "obesity": "Obesity",
+    "asthma": "Asthma",
+    "arthritis": "Arthritis",
+    "cancer risk": "Cancer Risk",
+    "cancer": "Cancer Risk",
+    "stroke risk": "Stroke Risk",
+    "stroke": "Stroke Risk",
+    "healthy": "Healthy"
+}
+
+
+@app.route("/chatbot", methods=["POST"])
+def chatbot():
+    try:
+        user_message = request.form.get("message", "").strip().lower()
+
+        if not user_message:
+            return jsonify({"reply": "Please enter a question."})
+
+        if any(word in user_message for word in ["hi", "hello", "hey", "hii", "helo"]):
+            return jsonify({
+                "reply": "Hello! I am your ChronoPreCure AI health guidance assistant. You can ask me about diseases, diet, exercise, prevention, urgent advice, latest result, dashboard, profile, blood pressure, glucose, cholesterol, BMI, and healthy habits."
+            })
+
+        if any(text in user_message for text in ["who are you", "what can you do", "help me", "how can you help"]):
+            return jsonify({
+                "reply": "I can help you understand disease risks, diet plans, exercise suggestions, prevention tips, urgent care guidance, latest saved assessment result, and how to use the ChronoPreCure system."
+            })
+
+        if any(text in user_message for text in ["my latest result", "my result", "latest result", "latest disease", "my assessment", "last result"]):
+            latest = get_latest_assessment()
+            if latest:
+                return jsonify({"reply": f"Your latest saved result is {latest['disease']} with {latest['risk']} risk level on {latest['date']}."})
+            return jsonify({"reply": "No saved assessment result found. Please complete a health assessment first."})
+
+        if any(text in user_message for text in ["diet time", "food time", "meal time", "when should i eat", "when to eat", "what time should i eat"]):
+            return jsonify({"reply": "A healthy routine is: breakfast between 7 AM and 9 AM, lunch between 12 PM and 2 PM, and dinner between 7 PM and 8:30 PM. Avoid late-night heavy meals."})
+
+        if any(text in user_message for text in ["water", "how much water", "drink water"]):
+            return jsonify({"reply": "Most people benefit from drinking enough water through the day. A common healthy habit is 2 to 3 liters daily unless a doctor has advised fluid restriction."})
+
+        selected_disease = None
+        for key, value in disease_map.items():
+            if key in user_message:
+                selected_disease = value
+                break
+
+        if selected_disease:
+            advice = advice_database.get(selected_disease, advice_database["Healthy"])
+            diet = diet_database.get(selected_disease, diet_database["Healthy"])
+
+            if any(word in user_message for word in ["what is", "about", "meaning", "explain"]):
+                return jsonify({"reply": disease_info.get(selected_disease, "This is a health condition that needs proper care and monitoring.")})
+
+            if any(word in user_message for word in ["diet", "food", "eat", "meal", "meals"]):
+                monday = diet.get("Monday", {})
+                veg = monday.get("veg", "Balanced healthy food")
+                nonveg = monday.get("nonveg", "Balanced healthy food")
+                return jsonify({"reply": f"For {selected_disease}, a sample diet suggestion is: Veg - {veg}. Non-veg - {nonveg}. Open the Diet Plan page to see more recommendations."})
+
+            if any(word in user_message for word in ["exercise", "workout", "activity", "activities", "physical activity"]):
+                exercises = advice.get("exercise", [])
+                return jsonify({"reply": f"Recommended exercises for {selected_disease} are: {', '.join(exercises)}."})
+
+            if any(word in user_message for word in ["prevent", "prevention", "avoid", "reduce risk", "how to prevent"]):
+                prevention = advice.get("prevention", [])
+                return jsonify({"reply": "Prevention tips: " + " ".join(prevention[:3])})
+
+            if any(word in user_message for word in ["lifestyle", "routine", "habits", "daily routine"]):
+                lifestyle = advice.get("lifestyle", [])
+                return jsonify({"reply": "Lifestyle guidance: " + " ".join(lifestyle[:3])})
+
+            if any(word in user_message for word in ["urgent", "emergency", "danger", "doctor", "hospital", "serious"]):
+                urgent = advice.get("urgent", [])
+                return jsonify({"reply": "Urgent medical guidance: " + " ".join(urgent[:3])})
+
+            return jsonify({"reply": f"I can help with {selected_disease}. Ask me about diet, exercise, prevention, lifestyle, urgent advice, or explanation."})
+
+        if any(word in user_message for word in ["blood pressure", "bp"]):
+            return jsonify({"reply": "Blood pressure is the force of blood flow in the arteries. High blood pressure may increase the risk of heart disease, kidney disease, and stroke."})
+
+        if any(word in user_message for word in ["glucose", "sugar", "blood sugar"]):
+            return jsonify({"reply": "Glucose is the level of sugar in the blood. High glucose is commonly associated with diabetes risk."})
+
+        if "cholesterol" in user_message:
+            return jsonify({"reply": "Cholesterol is a fatty substance in the blood. High cholesterol can increase the risk of heart disease and stroke."})
+
+        if any(word in user_message for word in ["bmi", "body mass index"]):
+            return jsonify({"reply": "BMI means Body Mass Index. It is calculated using height and weight and helps estimate whether body weight is in a healthy range."})
+
+        if any(word in user_message for word in ["risk", "risk level", "low risk", "medium risk", "high risk"]):
+            return jsonify({"reply": "ChronoPreCure shows Low, Medium, or High risk based on the model's prediction confidence and the health data pattern entered by the user."})
+
+        if any(word in user_message for word in ["lose weight", "reduce weight", "weight loss"]):
+            return jsonify({"reply": "To reduce weight, focus on portion control, regular walking or exercise, enough sleep, reducing junk food and sugary drinks, and eating more vegetables and protein."})
+
+        if any(word in user_message for word in ["stay healthy", "healthy tips", "general health"]):
+            healthy_advice = advice_database.get("Healthy", {})
+            prevention = healthy_advice.get("prevention", [])
+            return jsonify({"reply": "General healthy habits: " + " ".join(prevention[:3])})
+
+        if "assessment" in user_message:
+            return jsonify({"reply": "Open New Assessment, enter your health details such as age, height, weight, BP, glucose, cholesterol, symptoms, and lifestyle data, then submit the form to get the result."})
+
+        if "dashboard" in user_message:
+            return jsonify({"reply": "The dashboard shows total assessments, latest risk level, latest recorded date, and recent health assessment history."})
+
+        if "profile" in user_message:
+            return jsonify({"reply": "In the Profile page you can update your name, email, age, height, and weight. Click Save Profile to store the details."})
+
+        if "diet plan" in user_message:
+            return jsonify({"reply": "The Diet Plan page shows disease-specific weekly food guidance including vegetarian and non-vegetarian suggestions."})
+
+        if "results" in user_message or "result page" in user_message:
+            return jsonify({"reply": "The Results page displays the predicted disease, risk level, and guidance such as prevention, lifestyle advice, urgent medical advice, and diet support."})
+
+        return jsonify({
+            "reply": "I can answer questions about diabetes, heart disease, kidney disease, liver disease, obesity, asthma, arthritis, cancer risk, stroke risk, diet, exercise, prevention, urgent advice, assessment, dashboard, results, profile, blood pressure, glucose, cholesterol, BMI, and healthy habits."
+        })
+
+    except Exception as e:
+        print("Chatbot Error:", str(e))
+        return jsonify({"reply": "The chatbot had a backend error. Please try again."})
+
+# Initialize
 init_db()
+model, encoders = load_model_and_encoders()
 
 # ---------------- ROUTES ----------------
 @app.route("/")
 def index():
     return render_template("index.html")
 
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        session["user"] = "demo"
+        profile_data = get_profile()
+        session["user"] = profile_data["name"]
         return redirect("/dashboard")
     return render_template("login.html")
+
 
 @app.route("/forgot-password")
 def forgot_password():
     return render_template("forgot_password.html")
+
 
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
 
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         return redirect("/login")
     return render_template("register.html")
+
 
 @app.route("/dashboard")
 def dashboard():
@@ -587,6 +785,7 @@ def dashboard():
         recent_assessments=recent_assessments
     )
 
+
 @app.route("/profile", methods=["GET", "POST"])
 def profile():
     if request.method == "POST":
@@ -597,14 +796,18 @@ def profile():
         weight = request.form.get("weight", "").strip()
 
         save_profile(name, email, age, height, weight)
+        session["user"] = name if name else "User"
+        flash("Your details updated successfully!")
         return redirect(url_for("profile"))
 
     profile_data = get_profile()
     return render_template("profile.html", profile=profile_data)
 
+
 @app.route("/settings")
 def settings():
     return render_template("settings.html")
+
 
 @app.route("/statistics")
 def statistics():
@@ -620,70 +823,94 @@ def statistics():
     )
     return render_template("statistics.html", data=data)
 
+
 @app.route("/overview")
 def overview():
     return render_template("overview.html")
+
 
 @app.route("/assessment", methods=["GET", "POST"])
 def assessment():
     global last_result
 
     if request.method == "POST":
-        age = int(request.form["age"])
-        height = float(request.form["height"])
-        weight = float(request.form["weight"])
-        bp = int(request.form["bp"])
-        glucose = int(request.form["glucose"])
-        cholesterol = int(request.form["cholesterol"])
+        try:
+            age = int(request.form.get("age", 0))
+            gender = request.form.get("gender", "male")
+            height = float(request.form.get("height", 0))
+            weight = float(request.form.get("weight", 0))
+            bp = int(request.form.get("bp", 0))
+            glucose = int(request.form.get("glucose", 0))
+            cholesterol = int(request.form.get("cholesterol", 0))
 
-        chest = request.form.get("chest", "no")
-        breath = request.form.get("breath", "no")
-        joint = request.form.get("joint", "no")
-        fatigue = request.form.get("fatigue", "no")
-        smoking = request.form.get("smoking", "no")
-        alcohol = request.form.get("alcohol", "no")
+            smoking = request.form.get("smoking", "no")
+            alcohol = request.form.get("alcohol", "no")
+            exercise = request.form.get("exercise", "none")
+            sleep = int(request.form.get("sleep", 7))
 
-        bmi = round(weight / ((height / 100) ** 2), 2)
+            chest = request.form.get("chest", "no")
+            breath = request.form.get("breath", "no")
+            joint = request.form.get("joint", "no")
+            fatigue = request.form.get("fatigue", "no")
+            mood = request.form.get("mood", "no")
 
-        disease = "Healthy"
-        risk = "Low"
+            pregnant = request.form.get("pregnant", "no")
+            preg_month_raw = request.form.get("preg_month", "").strip()
+            preg_month = int(preg_month_raw) if preg_month_raw else 0
 
-        if glucose > 140:
-            disease = "Diabetes"
-            risk = "High"
-        elif chest == "yes" or cholesterol > 240:
-            disease = "Heart Disease"
-            risk = "High"
-        elif bp > 160:
-            disease = "Stroke Risk"
-            risk = "High"
-        elif alcohol == "regular" and fatigue == "yes":
-            disease = "Liver Disease"
-            risk = "Medium"
-        elif bp > 145 and fatigue == "yes" and age > 50:
-            disease = "Kidney Disease"
-            risk = "Medium"
-        elif bmi >= 30:
-            disease = "Obesity"
-            risk = "Medium"
-        elif breath == "yes":
-            disease = "Asthma"
-            risk = "Medium"
-        elif joint == "yes" and age > 45:
-            disease = "Arthritis"
-            risk = "Medium"
-        elif smoking == "yes" and age > 55 and fatigue == "yes":
-            disease = "Cancer Risk"
-            risk = "Medium"
+            bmi = round(weight / ((height / 100) ** 2), 2)
 
-        now = datetime.now().strftime("%d %B %Y - %I:%M %p")
+            form_input = {
+                "age": age,
+                "gender": gender,
+                "height_cm": height,
+                "weight_kg": weight,
+                "bmi": bmi,
+                "blood_pressure": bp,
+                "glucose": glucose,
+                "cholesterol": cholesterol,
+                "smoking": smoking,
+                "alcohol": alcohol,
+                "exercise": exercise,
+                "sleep_hours": sleep,
+                "chest_pain": chest,
+                "breathing_difficulty": breath,
+                "joint_pain": joint,
+                "fatigue": fatigue,
+                "mood_stress": mood,
+                "pregnant": pregnant,
+                "pregnancy_month": preg_month
+            }
 
-        save_assessment(disease, risk, bmi, now)
-        last_result = build_result(disease, risk, bmi, now)
+            input_df = prepare_input_data(form_input, encoders)
 
-        return redirect("/results")
+            predicted_class = model.predict(input_df)[0]
+            predicted_disease = encoders["target_disease"].inverse_transform([predicted_class])[0]
+
+            probability_array = model.predict_proba(input_df)[0]
+            all_probs = list(zip(encoders["target_disease"].classes_, probability_array))
+            all_probs = sorted(all_probs, key=lambda x: x[1], reverse=True)
+
+            print("Top prediction probabilities:")
+            for disease_name, prob in all_probs[:5]:
+                print(disease_name, round(prob * 100, 2), "%")
+
+            max_probability = round(float(all_probs[0][1]) * 100, 2)
+            risk = get_risk_from_probability(max_probability)
+            now = datetime.now().strftime("%d %B %Y - %I:%M %p")
+
+            predicted_disease = " ".join(word.capitalize() for word in predicted_disease.split())
+
+            save_assessment(predicted_disease, risk, bmi, now)
+            last_result = build_result(predicted_disease, risk, bmi, now)
+
+            return redirect("/results")
+
+        except Exception as e:
+            return f"Error in assessment prediction: {str(e)}"
 
     return render_template("assessment.html")
+
 
 @app.route("/results")
 def results():
@@ -702,6 +929,7 @@ def results():
 
     return render_template("results.html", data=last_result)
 
+
 @app.route("/diet-plan")
 def diet_plan():
     global last_result
@@ -718,6 +946,7 @@ def diet_plan():
         )
 
     return render_template("diet_plan.html", data=last_result)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

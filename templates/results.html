@@ -251,6 +251,172 @@ new Chart(document.getElementById("pieChart"),{
 </div>
 </div>
 </div>
+<!-- Chatbot Button -->
+<div id="chatbot-toggle" onclick="toggleChatbot()">💬</div>
 
+<!-- Chatbot Box -->
+<div id="chatbot-box">
+    <div id="chatbot-header">
+        ChronoPreCure Assistant
+        <span onclick="toggleChatbot()" style="float:right; cursor:pointer;">✖</span>
+    </div>
+
+    <div id="chatbot-messages">
+        <div class="bot-msg">
+            Hello! Ask me about diseases, diet, exercise, prevention, risk, dashboard, profile, or latest result.
+        </div>
+    </div>
+
+    <div id="chatbot-input-area">
+        <input type="text" id="chatbot-input" placeholder="Ask a question..." onkeypress="handleChatEnter(event)">
+        <button onclick="sendChatMessage()">Send</button>
+    </div>
+</div>
+
+<style>
+#chatbot-toggle {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    background: #2563eb;
+    color: white;
+    font-size: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+}
+
+#chatbot-box {
+    display: none;
+    position: fixed;
+    bottom: 95px;
+    right: 25px;
+    width: 360px;
+    height: 500px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    z-index: 9999;
+    border: 2px solid #2563eb;
+}
+
+#chatbot-header {
+    background: #0b2a4a;
+    color: white;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#chatbot-messages {
+    height: 380px;
+    overflow-y: auto;
+    padding: 12px;
+    background: #f7f9fc;
+}
+
+.bot-msg,
+.user-msg {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    max-width: 85%;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.bot-msg {
+    background: #e3f0ff;
+    color: #0b2a4a;
+}
+
+.user-msg {
+    background: #2563eb;
+    color: white;
+    margin-left: auto;
+}
+
+#chatbot-input-area {
+    display: flex;
+    border-top: 1px solid #ddd;
+    background: white;
+}
+
+#chatbot-input-area input {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+
+#chatbot-input-area button {
+    width: 80px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+</style>
+
+<script>
+function toggleChatbot() {
+    const box = document.getElementById("chatbot-box");
+    if (box.style.display === "block") {
+        box.style.display = "none";
+    } else {
+        box.style.display = "block";
+    }
+}
+
+function appendMessage(message, sender) {
+    const messages = document.getElementById("chatbot-messages");
+    const msgDiv = document.createElement("div");
+    msgDiv.className = sender === "user" ? "user-msg" : "bot-msg";
+    msgDiv.textContent = message;
+    messages.appendChild(msgDiv);
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function handleChatEnter(event) {
+    if (event.key === "Enter") {
+        sendChatMessage();
+    }
+}
+
+function sendChatMessage() {
+    const input = document.getElementById("chatbot-input");
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    appendMessage(message, "user");
+    input.value = "";
+
+    fetch("/chatbot", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "message=" + encodeURIComponent(message)
+    })
+    .then(response => response.json())
+    .then(data => {
+        appendMessage(data.reply, "bot");
+    })
+    .catch(error => {
+        console.log("Chatbot fetch error:", error);
+        appendMessage("Sorry, something went wrong. Please try again.", "bot");
+    });
+}
+</script>
 </body>
 </html>

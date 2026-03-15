@@ -1,227 +1,207 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Profile | ChronoPreCure</title>
+    <title>Profile | ChronoPreCure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-}
+        body {
+            background: url("{{ url_for('static', filename='images/dna-bg.png') }}") no-repeat center center fixed;
+            background-size: cover;
+        }
 
-body{
-background:url("{{ url_for('static', filename='images/dna-bg.png') }}") no-repeat center center fixed;
-background-size:cover;
-}
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
 
-.container{
-display:flex;
-min-height:100vh;
-}
+        .sidebar {
+            width: 260px;
+            background: #0b2a4a;
+            color: white;
+            padding: 25px;
+            position: fixed;
+            height: 100vh;
+        }
 
-.sidebar{
-width:260px;
-background:#0b2a4a;
-color:white;
-padding:25px;
-position:fixed;
-height:100vh;
-}
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
 
-.logo{
-display:flex;
-align-items:center;
-gap:12px;
-margin-bottom:30px;
-}
+        .logo img {
+            width: 45px;
+        }
 
-.logo img{
-width:45px;
-}
+        .sidebar a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
 
-.sidebar a{
-display:block;
-padding:12px;
-color:white;
-text-decoration:none;
-margin-top:10px;
-border-radius:8px;
-}
+        .sidebar a:hover {
+            background: #1e4e8c;
+        }
 
-.sidebar a:hover{
-background:#1e4e8c;
-}
+        .bottom-links {
+            position: absolute;
+            bottom: 20px;
+            left: 25px;
+            right: 25px;
+        }
 
-.bottom-links{
-position:absolute;
-bottom:20px;
-left:25px;
-right:25px;
-}
+        .main {
+            flex: 1;
+            padding: 40px;
+            margin-left: 260px;
+        }
 
-.main{
-flex:1;
-margin-left:260px;
-padding:40px;
-}
+        .profile-card {
+            background: #f7f7f7;
+            border-radius: 28px;
+            padding: 50px 45px;
+            max-width: 1030px;
+            margin: auto;
+        }
 
-.card{
-background:white;
-padding:35px;
-border-radius:20px;
-box-shadow:0 0 25px rgba(0,0,0,0.3);
-max-width:800px;
-}
+        .profile-card h1 {
+            color: #0b2a4a;
+            font-size: 34px;
+            margin-bottom: 30px;
+        }
 
-h1{
-color:#0b2a4a;
-margin-bottom:25px;
-}
+        .row {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            align-items: center;
+            gap: 35px;
+            padding: 18px 0;
+            border-bottom: 1px solid #e7e7e7;
+        }
 
-.profile-row{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:14px 0;
-border-bottom:1px solid #eee;
-gap:20px;
-}
+        .row label {
+            font-size: 22px;
+            font-weight: bold;
+            color: #0b2a4a;
+        }
 
-.profile-label{
-font-weight:bold;
-color:#0b2a4a;
-width:180px;
-}
+        .row input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 3px solid #d7e1f2;
+            border-radius: 16px;
+            font-size: 20px;
+            outline: none;
+            background: white;
+        }
 
-.profile-input{
-flex:1;
-padding:10px 12px;
-border:2px solid #d9e2f2;
-border-radius:10px;
-font-size:16px;
-outline:none;
-}
+        .row input[readonly] {
+            background: #eceef3;
+            color: #444;
+        }
 
-.profile-input:focus{
-border-color:#2563eb;
-}
+        .save-btn {
+            margin-top: 32px;
+            background: #2f66e0;
+            color: white;
+            border: none;
+            padding: 16px 34px;
+            border-radius: 18px;
+            font-size: 18px;
+            cursor: pointer;
+        }
 
-.profile-value{
-color:#333;
-}
+        .save-btn:hover {
+            background: #1f55cb;
+        }
 
-.readonly-box{
-flex:1;
-padding:10px 12px;
-background:#f5f7fb;
-border-radius:10px;
-color:#333;
-}
-
-.btn-row{
-margin-top:25px;
-display:flex;
-gap:15px;
-}
-
-.save-btn{
-padding:12px 22px;
-background:#2563eb;
-color:white;
-border:none;
-border-radius:10px;
-cursor:pointer;
-font-size:16px;
-}
-
-.save-btn:hover{
-background:#1e4ed8;
-}
-
-.note{
-margin-top:18px;
-font-size:14px;
-color:#555;
-}
-</style>
+        .note {
+            margin-top: 20px;
+            color: #555;
+            font-size: 16px;
+        }
+    </style>
 </head>
-
 <body>
 
 <div class="container">
+    <div class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+            <h2>ChronoPreCure</h2>
+        </div>
 
-<div class="sidebar">
+        <a href="{{ url_for('dashboard') }}">Home</a>
+        <a href="{{ url_for('assessment') }}">New Assessment</a>
+        <a href="{{ url_for('statistics') }}">Statistics</a>
+        <a href="{{ url_for('overview') }}">Body Overview</a>
+        <a href="{{ url_for('settings') }}">Settings</a>
 
-<div class="logo">
-<img src="{{ url_for('static', filename='images/logo.png') }}">
-<h2>ChronoPreCure</h2>
-</div>
+        <div class="bottom-links">
+            <a href="{{ url_for('profile') }}">👤 {{ profile.name }}</a>
+            <a href="{{ url_for('logout') }}">🚪 Logout</a>
+        </div>
+    </div>
 
-<a href="/dashboard">Home</a>
-<a href="/assessment">New Assessment</a>
-<a href="/statistics">Statistics</a>
-<a href="/overview">Body Overview</a>
-<a href="/settings">Settings</a>
+    <div class="main">
+        <div class="profile-card">
+            <h1>User Profile</h1>
 
-<div class="bottom-links">
-<a href="/profile">👤 Profile</a>
-<a href="/logout">🚪 Logout</a>
-</div>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <script>
+                        alert("Your details updated successfully!");
+                    </script>
+                {% endif %}
+            {% endwith %}
 
-</div>
+            <form method="POST" action="{{ url_for('profile') }}">
+                <div class="row">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" value="{{ profile.name }}">
+                </div>
 
-<div class="main">
+                <div class="row">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="{{ profile.email }}">
+                </div>
 
-<div class="card">
+                <div class="row">
+                    <label for="age">Age</label>
+                    <input type="text" id="age" name="age" value="{{ profile.age }}">
+                </div>
 
-<h1>User Profile</h1>
+                <div class="row">
+                    <label for="height">Height</label>
+                    <input type="text" id="height" name="height" value="{{ profile.height }}">
+                </div>
 
-<form method="POST" action="{{ url_for('profile') }}">
+                <div class="row">
+                    <label for="weight">Weight</label>
+                    <input type="text" id="weight" name="weight" value="{{ profile.weight }}">
+                </div>
 
-<div class="profile-row">
-<span class="profile-label">Name</span>
-<input type="text" name="name" class="profile-input" value="{{ profile.name }}">
-</div>
+                <div class="row">
+                    <label for="member_since">Member Since</label>
+                    <input type="text" id="member_since" value="{{ profile.member_since }}" readonly>
+                </div>
 
-<div class="profile-row">
-<span class="profile-label">Email</span>
-<input type="email" name="email" class="profile-input" value="{{ profile.email }}">
-</div>
+                <button type="submit" class="save-btn">Save Profile</button>
+            </form>
 
-<div class="profile-row">
-<span class="profile-label">Age</span>
-<input type="number" name="age" class="profile-input" value="{{ profile.age }}">
-</div>
-
-<div class="profile-row">
-<span class="profile-label">Height</span>
-<input type="text" name="height" class="profile-input" value="{{ profile.height }}" placeholder="e.g. 170 cm">
-</div>
-
-<div class="profile-row">
-<span class="profile-label">Weight</span>
-<input type="text" name="weight" class="profile-input" value="{{ profile.weight }}" placeholder="e.g. 65 kg">
-</div>
-
-<div class="profile-row">
-<span class="profile-label">Member Since</span>
-<div class="readonly-box">{{ profile.member_since }}</div>
-</div>
-
-<div class="btn-row">
-<button type="submit" class="save-btn">Save Profile</button>
-</div>
-
-<p class="note">Update your profile details and click Save Profile to store them.</p>
-
-</form>
-
-</div>
-
-</div>
-
+            <p class="note">Update your profile details and click Save Profile to store them.</p>
+        </div>
+    </div>
 </div>
 
 </body>
